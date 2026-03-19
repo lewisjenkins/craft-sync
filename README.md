@@ -44,6 +44,12 @@ The format is `SYNC_<ENVIRONMENT>=<SSH_HOST>:<REMOTE_ROOT>`, where `REMOTE_ROOT`
 
 Note that `REMOTE_ROOT` must be an absolute path (e.g. `/home/user/my-craft-project`). Tilde paths (e.g. `~/my-craft-project`) will not work.
 
+Before running the script, make sure you can connect to the remote server via SSH. If this is the first time connecting, you will be prompted to confirm the host key:
+
+```bash
+ssh user@example.com
+```
+
 ## Usage
 
 ```bash
