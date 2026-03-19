@@ -63,7 +63,7 @@ Note that `REMOTE_ROOT` must be an absolute path (e.g. `/home/user/my-craft-proj
 ./scripts/sync.sh --pull assets --pull db --from production
 
 # Dry run (no changes made)
-./scripts/sync.sh --pull assets --from production --dry-run
+./scripts/sync.sh --pull assets --pull db --from production --dry-run
 
 # Delete files on destination that don't exist on source
 ./scripts/sync.sh --pull assets --from production --delete
