@@ -15,6 +15,7 @@ Download the script into your project's `scripts/` folder:
 
 ```bash
 cd my-craft-project
+mkdir -p scripts
 curl -o scripts/sync.sh https://raw.githubusercontent.com/lewisjenkins/craft-sync/main/sync.sh
 chmod +x scripts/sync.sh
 ```
