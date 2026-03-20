@@ -53,6 +53,8 @@ exit
 
 ## Usage
 
+### Pulling from a remote environment
+
 ```bash
 # Pull all asset volumes
 ./scripts/sync.sh --pull assets --from production
@@ -77,9 +79,34 @@ exit
 
 # Pull database and apply project config afterwards
 ./scripts/sync.sh --pull db --from production --pc apply
+```
 
-# Pull database and rebuild project config afterwards
-./scripts/sync.sh --pull db --from production --pc rebuild
+### Pushing to a remote environment
+
+```bash
+# Push all asset volumes
+./scripts/sync.sh --push assets --to production
+
+# Push a specific asset volume by handle
+./scripts/sync.sh --push assets:images --to production
+
+# Push multiple targets
+./scripts/sync.sh --push assets:images --push assets:documents --to production
+
+# Push the database
+./scripts/sync.sh --push db --to production
+
+# Push assets and database together
+./scripts/sync.sh --push assets --push db --to production
+
+# Dry run (no changes made)
+./scripts/sync.sh --push assets --push db --to production --dry-run
+
+# Delete files on destination that don't exist on source
+./scripts/sync.sh --push assets --to production --delete
+
+# Push database and apply project config on remote afterwards
+./scripts/sync.sh --push db --to staging --pc apply
 ```
 
 ## Options
@@ -87,10 +114,14 @@ exit
 | Option | Description |
 |--------|-------------|
 | `--pull <target>` | Target to pull. Can be `assets`, `assets:<handle>`, or `db`. Repeatable. |
+| `--push <target>` | Target to push. Can be `assets`, `assets:<handle>`, or `db`. Repeatable. |
 | `--from <environment>` | Environment to pull from. Must match a `SYNC_*` variable in `.env`. |
+| `--to <environment>` | Environment to push to. Must match a `SYNC_*` variable in `.env`. |
 | `--dry-run` | Show what would happen without making any changes. |
 | `--delete` | Delete files on the destination that don't exist on the source (assets only). |
 | `--pc <apply\|rebuild>` | After a database restore, apply or rebuild project config (db only). |
+
+`--pull` and `--push` are mutually exclusive. Use `--from` with `--pull` and `--to` with `--push`.
 
 ## How It Works
 
@@ -98,28 +129,13 @@ exit
 - Skips volumes with remote filesystems (e.g. S3) that have no local path
 - Asset volumes are synchronised using `rsync`, which only transfers files that have changed — making syncs fast and efficient regardless of the total volume size. If you want an exact mirror of the source, use `--delete` to remove any files on the destination that no longer exist on the source
 - For database pulls, uses `php craft db/backup` on the remote server, downloads the backup via `rsync`, restores it locally using `php craft db/restore`, optionally syncs project config via `--pc`, then cleans up
-
-## After a Database Pull
-
-After pulling a database you may want to sync your project config. You can do this automatically by passing `--pc apply` or `--pc rebuild` to the script, or run the commands manually afterwards. Choose based on your workflow:
-
-```bash
-# Apply your local config/project/ YAML files to the restored database
-php craft project-config/apply
-
-# or
-
-# Rebuild your local config/project/ YAML files from the restored database
-php craft project-config/rebuild
-```
+- For database pushes, uses `php craft db/backup` locally, uploads the backup via `rsync`, restores it on the remote server, optionally syncs remote project config via `--pc`, then cleans up
 
 ## Notes
 
 This is a script I made for myself to make my development life easier. It's relatively simple and straightforward, and you're free to use it as you see fit.
 
 A few things worth mentioning:
-
-**No push option** — I considered adding a `--push` option but decided against it to avoid potential confusion or accidents. The script is designed to live in the Craft project repository alongside your code. If you need to sync in the opposite direction, simply run the script from the other server to pull in the direction you need.
 
 **Craft 5 only** — the script relies on Craft 5's volume and filesystem APIs. It has not been tested with earlier versions of Craft.
 
